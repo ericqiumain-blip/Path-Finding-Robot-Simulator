@@ -6,13 +6,13 @@
 
 ## Demo
 
-![Pathfinder dashboard captured from the running C++ simulation](docs/demo/screenshot.png)
+![Warehouse robots and robot selector recorded from the C++ simulation](docs/demo/demo.gif)
 
-Build and run the project, then open **http://127.0.0.1:8080**. Try 10× speed, enable planned paths, and select a robot to inspect its current task and battery. Use the same layout and seed when comparing schedulers.
+Build and run the project, then open **http://127.0.0.1:8080**. Try 10× speed and select a robot to inspect its current task and battery. Use the same layout and seed when comparing schedulers.
 
-The dashboard includes live throughput and fleet metrics, a selectable warehouse canvas, heatmap/path/reservation overlays, a robot inspector, a task queue, metric exports, and controls for pause, step, restart, fleet size, arrival rate, scheduler and seed.
+The dashboard includes live throughput and fleet metrics, a selectable warehouse canvas, a robot inspector, a task queue, metric exports, and controls for pause, step, restart, fleet size, arrival rate, scheduler and seed.
 
-Demo media lives in [`docs/demo/`](docs/demo/README.md). That page explains how to reproduce the screenshot and where to add a GIF or video; no generated illustration is presented as a running simulation.
+Demo media lives in [`docs/demo/`](docs/demo/README.md). The GIF shows a recorded warehouse run and robot selector; it is not an interactive control. Capture instructions are included there.
 
 ## Features
 
@@ -20,7 +20,7 @@ Demo media lives in [`docs/demo/`](docs/demo/README.md). That page explains how 
 - **Hand-written A*:** binary priority queue, admissible Manhattan heuristic, route cost/node/timing statistics.
 - **Concurrent collision avoidance:** exclusive cells, reverse-edge rejection, safe following chains, waiting, replanning and four-tick reservation forecasts.
 - **Interchangeable assignment:** seeded random, Manhattan nearest, exact route-cost selection with A* confirmation, and rectangular Hungarian optimization.
-- **Congestion-aware routes:** decaying density penalties and a cumulative traffic heatmap.
+- **Congestion-aware routes:** decaying density penalties and cumulative traffic counters.
 - **Battery management:** round-trip energy checks, charger admission, charging time and automatic return-to-work.
 - **Failure recovery:** temporary/permanent failures, abandoned-order reassignment and physical failed-robot obstacles.
 - **Real engine visualization:** React/TypeScript canvas, SSE snapshots and a small Node bridge to the C++ process.

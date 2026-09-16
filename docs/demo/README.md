@@ -1,19 +1,17 @@
-# Demo media
+﻿# Demo recording
 
-This directory is the intended home for media captured from the running simulator.
+![Warehouse animation and robot selector](demo.gif)
 
-![Running Pathfinder dashboard](screenshot.png)
+The README uses `demo.gif`: an eight-second looping recording of the real C++ simulation, cropped to the warehouse and robot dropdown. It has 80 frames, includes robot selection changes, and contains no heatmap, reservation, or planned-path overlays. A GIF is a recording; its dropdown is not interactive.
 
-- `screenshot.png`: actual dashboard screenshot captured by the browser integration check.
-- `demo.gif` or `demo.mp4`: optional future recording; these are not fabricated or bundled placeholders.
+## Recreate it
 
-To record a demonstration:
+With dependencies installed and the built simulator running through `npm start`:
 
-1. Follow the root README to build the engine and dashboard, then run `npm start`.
-2. Open `http://127.0.0.1:8080` at a desktop resolution.
-3. Use the medium layout with 32 robots, seed 42 and 10× speed.
-4. Show robots retrieving items, delivering to packing, and battery levels changing.
-5. Select a robot, toggle planned paths, then switch to the congestion heatmap or reservations.
-6. Export metrics to show that the visual demo and benchmark data come from the same engine.
+```sh
+node scripts/capture-demo.mjs
+```
 
-A screenshot documents one observed state, not a claim about throughput capacity. Benchmark tables come only from native CLI runs.
+The capture script uses installed Chrome (or Playwright Chromium with `CI=1`), resets to the medium layout with 32 robots and seed 42, and advances the native engine one tick per frame. Presentation-only cropping does not alter robot positions. `recording.json` records frame count, tick range and settings.
+
+`screenshot.png` is retained as a full-dashboard reference from browser testing; the repository front page displays the GIF instead.

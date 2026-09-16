@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 
-test('live controls, robot selection, overlays, fleet and analytics', async ({ page }) => {
+test('live controls, robot selection, fleet and analytics', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
@@ -23,10 +23,6 @@ test('live controls, robot selection, overlays, fleet and analytics', async ({ p
   const cell = Math.min((box!.width - 50) / state.warehouse.width, (box!.height - 48) / state.warehouse.height);
   await canvas.click({ position: { x: (box!.width - cell * state.warehouse.width) / 2 + (target.x + .5) * cell, y: (box!.height - cell * state.warehouse.height) / 2 + (target.y + .5) * cell } });
   await expect(page.getByTestId('selected-robot')).toHaveText('R-007');
-  await page.getByRole('button', { name: 'Planned paths', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Planned paths', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await page.getByRole('button', { name: 'Heatmap', exact: true }).click();
-  await page.getByRole('button', { name: 'Reservations', exact: true }).click();
   await page.getByRole('button', { name: /Robot fleet/ }).click();
   await page.getByLabel('Search robots').fill('R-003');
   await expect(page.locator('tbody tr')).toHaveCount(1);
@@ -66,7 +62,6 @@ test('capture an actual running simulation', async ({ page }) => {
   await page.goto('/');
   await expect.poll(async () => (await (await page.request.get('/api/state')).json()).tick, { timeout: 15000 }).toBeGreaterThan(180);
   await page.getByRole('button', { name: '10×', exact: true }).click();
-  await page.getByRole('button', { name: 'Planned paths', exact: true }).click();
   const state = await (await page.request.get('/api/state')).json();
   const active = state.robots.find((r: { path: unknown[] }) => r.path.length > 10);
   if (active) await page.getByLabel('Select robot').selectOption(String(active.id));

@@ -65,7 +65,7 @@ For `B` order rows and `R` robot columns, work is `O(B²(R+B))`; the matrix uses
 
 Two fields serve different purposes:
 
-1. **Cumulative visits:** increment on every successful move; never decay; displayed as the heatmap.
+1. **Cumulative visits:** increment on every successful move; never decay; available in the engine state API.
 2. **Recent density:** multiply by `0.96` each tick and add `0.12` on entry; feed into A* costs.
 
 Charging routes use zero congestion weight to avoid needless energy detours. A rejected movement increments `collisionsPrevented`; a blocked streak reaching three ticks increments `congestionEvents`. These are intervention/event counters, not measurements of actual collisions. Actual same-cell and swap collisions are forbidden and tested as invariants.

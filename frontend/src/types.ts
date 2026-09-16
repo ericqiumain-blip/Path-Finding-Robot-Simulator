@@ -54,8 +54,6 @@ export type SimulationState = {
   robots: Robot[];
   orders: Order[];
   metrics: Metrics;
-  heatmap: number[];
-  reservations: (Point & { tick: number; robotId: number })[];
   history: HistoryPoint[];
 };
 export type Control = {
@@ -63,7 +61,6 @@ export type Control = {
   speed?: number;
   config?: Config;
 };
-export type Overlay = 'paths' | 'heatmap' | 'reservations' | 'states';
 
 export function stateLabel(state: string): string {
   return state.toLowerCase().replaceAll('_', ' ').replace(/^./, s => s.toUpperCase());

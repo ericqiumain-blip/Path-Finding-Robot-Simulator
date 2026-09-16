@@ -1,0 +1,11 @@
+{
+  "frames": 80,
+  "changingFrames": 79,
+  "delayMs": 100,
+  "firstTick": 121,
+  "lastTick": 200,
+  "seed": 42,
+  "robots": 32,
+  "layout": "medium",
+  "bytes": 5772874
+}

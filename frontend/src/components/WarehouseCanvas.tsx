@@ -1,15 +1,14 @@
 ﻿import { useEffect, useRef } from 'react';
-import type { Overlay, Robot, SimulationState } from '../types';
+import type { Robot, SimulationState } from '../types';
 import { robotCategory, robotColors, robotName } from '../types';
 
 type Props = {
   state: SimulationState;
-  overlays: Set<Overlay>;
   selected: number | null;
   onSelect: (id: number) => void;
 };
 
-export function WarehouseCanvas({ state, overlays, selected, onSelect }: Props) {
+export function WarehouseCanvas({ state, selected, onSelect }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const view = useRef({ cell: 1, left: 0, top: 0 });
   const current = useRef(state);
@@ -44,7 +43,7 @@ export function WarehouseCanvas({ state, overlays, selected, onSelect }: Props) 
     resize.observe(canvas);
     function draw(now: number) {
       if (!context) return;
-      const { warehouse, robots, heatmap, reservations, tick } = current.current;
+      const { warehouse, robots } = current.current;
       if (width < 1 || height < 1) { animation = requestAnimationFrame(draw); return; }
       const cell = Math.min((width - 50) / warehouse.width, (height - 48) / warehouse.height);
       const left = (width - cell * warehouse.width) / 2;
@@ -106,40 +105,6 @@ export function WarehouseCanvas({ state, overlays, selected, onSelect }: Props) 
       context.font = '9px "SFMono-Regular", Consolas, monospace';
       context.fillStyle = '#4f6379';
       for (let x = 0; x < warehouse.width; x += 5) context.fillText(String(x).padStart(2, '0'), xAt(x), top - 12);
-      if (overlays.has('heatmap') && heatmap?.length) {
-        const max = Math.max(1, ...heatmap);
-        for (let i = 0; i < heatmap.length; i++) {
-          if (!heatmap[i]) continue;
-          const value = Math.sqrt(heatmap[i] / max);
-          context.fillStyle = `rgba(245, ${Math.round(160 - value * 80)}, 66, ${value * .67})`;
-          context.fillRect(left + i % warehouse.width * cell, top + Math.floor(i / warehouse.width) * cell, cell, cell);
-        }
-      }
-      if (overlays.has('reservations')) {
-        for (const reservation of reservations ?? []) {
-          if (reservation.tick < tick || reservation.tick > tick + 12) continue;
-          context.fillStyle = `rgba(181, 158, 252, ${Math.max(.08, .4 - (reservation.tick - tick) * .025)})`;
-          context.fillRect(left + reservation.x * cell + cell * .15, top + reservation.y * cell + cell * .15, cell * .7, cell * .7);
-        }
-      }
-      const pathRobots = overlays.has('paths') ? robots : robots.filter(robot => robot.id === selected);
-      for (const robot of pathRobots) {
-        if (!robot.path?.length) continue;
-        context.beginPath();
-        context.moveTo(xAt(robot.x), yAt(robot.y));
-        for (const point of robot.path) context.lineTo(xAt(point.x), yAt(point.y));
-        context.strokeStyle = robot.id === selected ? '#85efd7' : '#51bda25c';
-        context.lineWidth = robot.id === selected ? 1.8 : 1;
-        context.setLineDash(robot.id === selected ? [4, 4] : [2, 5]);
-        context.stroke();
-        context.setLineDash([]);
-        if (robot.id === selected) {
-          const destination = robot.path[robot.path.length - 1];
-          context.strokeStyle = '#85efd7';
-          context.lineWidth = 1.5;
-          context.strokeRect(left + destination.x * cell + 2, top + destination.y * cell + 2, cell - 4, cell - 4);
-        }
-      }
       const progress = Math.min(1, (now - updated.current) / frameGap.current);
       const sorted = [...robots].sort((a, b) => Number(a.id === selected) - Number(b.id === selected));
       for (const robot of sorted) {
@@ -150,7 +115,7 @@ export function WarehouseCanvas({ state, overlays, selected, onSelect }: Props) 
         const cx = xAt(x);
         const cy = yAt(y);
         const radius = Math.max(2.1, cell * .28);
-        const color = overlays.has('states') ? robotColors[robotCategory(robot.state)] : '#70e7ce';
+        const color = robotColors[robotCategory(robot.state)];
         if (robot.id === selected) {
           context.beginPath();
           context.arc(cx, cy, radius + 5, 0, Math.PI * 2);
@@ -190,7 +155,7 @@ export function WarehouseCanvas({ state, overlays, selected, onSelect }: Props) 
     }
     animation = requestAnimationFrame(draw);
     return () => { resize.disconnect(); cancelAnimationFrame(animation); };
-  }, [overlays, selected]);
+  }, [selected]);
 
   const select = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();

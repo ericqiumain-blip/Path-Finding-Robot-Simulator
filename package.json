@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "engines": {"node": ">=20"},
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build:engine": "node scripts/build.mjs release",
     "build:debug": "node scripts/build.mjs debug",
@@ -16,5 +18,9 @@
     "dev:frontend": "npm --prefix frontend run dev",
     "benchmark": "node scripts/benchmark.mjs"
   },
-  "devDependencies": {"@playwright/test": "1.56.1"}
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "gifenc": "^1.0.3",
+    "pngjs": "^7.0.0"
+  }
 }
