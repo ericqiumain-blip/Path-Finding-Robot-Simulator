@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-09-15T23:49:16.443Z",
+  "platform": "win32",
+  "release": "10.0.26200",
+  "arch": "x64",
+  "cpu": "Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz",
+  "logicalCpus": 8,
+  "memoryGiB": 16,
+  "options": {
+    "robots": "10,25,50,100,250,500,1000",
+    "schedulers": "random,nearest,cost,hungarian",
+    "ticks": "300",
+    "orders": "10000",
+    "rate": "10",
+    "seed": "42",
+    "layout": "large",
+    "output": "benchmarks/results",
+    "repeats": "1"
+  },
+  "build": "Release",
+  "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\EricQ\\Pathfinder\\scripts\\benchmark.mjs",
+  "compiler": "g++.exe (GCC) 16.2.0",
+  "engineAndLayoutsSha256": "1d5e23c95791e9f01d8a3e6e1ff99c31eb660c1fe2d1dfffdce0312376e0180b",
+  "revision": "uncommitted workspace"
+}

@@ -1,0 +1,20 @@
+{
+  "name": "pathfinder-warehouse-simulator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=20"},
+  "scripts": {
+    "build:engine": "node scripts/build.mjs release",
+    "build:debug": "node scripts/build.mjs debug",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm run build:engine && npm run build:frontend",
+    "test": "node scripts/build.mjs debug test",
+    "test:api": "node --test tests/api.test.mjs tests/cli.test.mjs",
+    "test:ui": "playwright test",
+    "start": "node server/index.mjs",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "benchmark": "node scripts/benchmark.mjs"
+  },
+  "devDependencies": {"@playwright/test": "1.56.1"}
+}

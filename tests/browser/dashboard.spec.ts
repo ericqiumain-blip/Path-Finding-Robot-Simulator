@@ -1,0 +1,75 @@
+import { test, expect } from '@playwright/test';
+import { mkdir } from 'node:fs/promises';
+
+test('live controls, robot selection, overlays, fleet and analytics', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/');
+  await expect(page.getByText('Engine connected', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Pause', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Resume', exact: true })).toBeVisible();
+  const before = await (await page.request.get('/api/state')).json();
+  await page.getByRole('button', { name: 'Advance one tick' }).click();
+  await expect.poll(async () => (await (await page.request.get('/api/state')).json()).tick).toBe(before.tick + 1);
+  await page.getByRole('button', { name: '50×', exact: true }).click();
+  await expect(page.getByRole('button', { name: '50×', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Resume', exact: true }).click();
+  await expect.poll(async () => (await (await page.request.get('/api/state')).json()).metrics.ordersCompleted, { timeout: 15000 }).toBeGreaterThan(0);
+  await page.getByRole('button', { name: 'Pause', exact: true }).click();
+  const state = await (await page.request.get('/api/state')).json();
+  const canvas = page.getByRole('img', { name: /^Warehouse map/ });
+  const box = await canvas.boundingBox();
+  const target = state.robots[7];
+  const cell = Math.min((box!.width - 50) / state.warehouse.width, (box!.height - 48) / state.warehouse.height);
+  await canvas.click({ position: { x: (box!.width - cell * state.warehouse.width) / 2 + (target.x + .5) * cell, y: (box!.height - cell * state.warehouse.height) / 2 + (target.y + .5) * cell } });
+  await expect(page.getByTestId('selected-robot')).toHaveText('R-007');
+  await page.getByRole('button', { name: 'Planned paths', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Planned paths', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Heatmap', exact: true }).click();
+  await page.getByRole('button', { name: 'Reservations', exact: true }).click();
+  await page.getByRole('button', { name: /Robot fleet/ }).click();
+  await page.getByLabel('Search robots').fill('R-003');
+  await expect(page.locator('tbody tr')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Inspect R-003' }).click();
+  await expect(page.getByTestId('selected-robot')).toHaveText('R-003');
+  await page.getByRole('button', { name: 'Analytics', exact: true }).click();
+  await expect(page.getByText('95th percentile fulfillment')).toBeVisible();
+  await page.getByRole('button', { name: 'Live floor', exact: true }).click();
+  await page.getByLabel('Warehouse layout').selectOption('small');
+  await page.getByLabel('Robot count', { exact: true }).fill('10');
+  await page.getByLabel('Random seed', { exact: true }).fill('17');
+  await page.getByRole('button', { name: 'Apply & restart' }).click();
+  await expect.poll(async () => (await (await page.request.get('/api/state')).json()).config.robots).toBe(10);
+  await expect(page.getByTestId('simulation-clock')).toHaveText('00:00:00');
+  const download = page.waitForEvent('download');
+  await page.getByRole('link', { name: 'Export CSV' }).click();
+  expect((await download).suggestedFilename()).toBe('pathfinder-metrics.csv');
+  expect(errors).toEqual([]);
+});
+
+test('dashboard fits a phone viewport and supports controls', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await expect(page.getByText('Engine connected', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Warehouse overview/ })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByLabel('Select robot').selectOption('2');
+  await expect(page.getByTestId('selected-robot')).toHaveText('R-002');
+});
+
+test('capture an actual running simulation', async ({ page }) => {
+  await page.request.post('/api/control', { data: { action: 'pause' } });
+  await page.request.post('/api/control', { data: { action: 'restart', config: { robots: 32, layout: 'medium', scheduler: 'nearest', seed: 42, orderRate: 1.5 } } });
+  await page.request.post('/api/control', { data: { action: 'speed', speed: 50 } });
+  await page.request.post('/api/control', { data: { action: 'resume' } });
+  await page.setViewportSize({ width: 1512, height: 1120 });
+  await page.goto('/');
+  await expect.poll(async () => (await (await page.request.get('/api/state')).json()).tick, { timeout: 15000 }).toBeGreaterThan(180);
+  await page.getByRole('button', { name: '10×', exact: true }).click();
+  await page.getByRole('button', { name: 'Planned paths', exact: true }).click();
+  const state = await (await page.request.get('/api/state')).json();
+  const active = state.robots.find((r: { path: unknown[] }) => r.path.length > 10);
+  if (active) await page.getByLabel('Select robot').selectOption(String(active.id));
+  await mkdir('docs/demo', { recursive: true });
+  await page.screenshot({ path: 'docs/demo/screenshot.png', fullPage: true });
+});
