@@ -105,23 +105,6 @@ npm run benchmark
 
 `--orders` is a total generation cap, not an assertion that those orders complete. `--until-complete` stops early on completion while `--ticks` still provides a hard limit. Run `warehouse_sim --help` for all options.
 
-## Architecture
-
-```mermaid
-flowchart TD
-    React[React + TypeScript / Canvas] <-->|HTTP controls + SSE state| Node[Local Node bridge]
-    Node <-->|NDJSON pipes| Engine[C++ SimulationEngine]
-    Benchmark[Benchmark CLI] --> Engine
-    Engine --> Scheduler[Scheduler<br/>Random / Nearest / Cost / Hungarian]
-    Engine --> Planner[PathPlanner / A*]
-    Engine --> Fleet[Orders / Tasks / Robot state machines]
-    Fleet --> Collision[CollisionManager<br/>Cell + edge reservations]
-    Engine --> Warehouse[Warehouse / Shelves / Stations]
-    Engine --> Metrics[MetricsCollector → JSON / CSV]
-```
-
-The C++ engine owns all simulation state. The Node process only manages transport and playback pacing. Browser rendering is independent of simulation time. See [architecture](docs/ARCHITECTURE.md) and the [API contract](docs/API.md).
-
 ## Algorithms
 
 **A\*.** Searches a four-connected grid using `g + Manhattan distance`. Walls/shelves block movement. Nonnegative recent-traffic penalties can favor longer but less congested routes. Static BFS distance fields accelerate repeated feasibility/cost estimates.
